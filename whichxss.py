@@ -19,8 +19,8 @@ banner = '''
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=banner, formatter_class=RawTextHelpFormatter, usage="python whichxss.py [option]")
-    
-    parser.add_argument('-f',   metavar="WAF_FILTER",   est="filter",           action='append', default=[], help="A text filtered by WAF")
+
+    parser.add_argument('-f',   metavar="WAF_FILTER",   dest="filter",           action='append', default=[], help="A text filtered by WAF")
     parser.add_argument('-fR',  metavar="WAF_REGEX",    dest="filter_regex",    action='append', default=[], help="A text filtered by WAF using Regex")
     parser.add_argument('--show', default=False,        action="store_true",    dest="show_payloads", help="Show results")
 
