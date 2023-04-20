@@ -20,9 +20,10 @@ banner = '''
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=banner, formatter_class=RawTextHelpFormatter, usage="python whichxss.py [option]")
 
-    parser.add_argument('-f',   metavar="WAF_FILTER",   dest="filter",          action='append', default=[], help="A text filtered by WAF")
-    parser.add_argument('-fR',  metavar="WAF_REGEX",    dest="filter_regex",    action='append', default=[], help="A text filtered by WAF using Regex")
-    parser.add_argument('--show', default=False,        action="store_true",    dest="show_payloads", help="Show results")
+    parser.add_argument('-f',     metavar="WAF_FILTER",   dest="filter",          action='append', default=[], help="A text filtered by WAF")
+    parser.add_argument('-fR',    metavar="WAF_REGEX",    dest="filter_regex",    action='append', default=[], help="A text filtered by WAF using Regex")
+    parser.add_argument('-l',     default=False,          action="store_true",    dest="lower", help="Treat all payloads as lowercase in search")
+    parser.add_argument('--show', default=False,          action="store_true",    dest="show_payloads", help="Show results")
 
     try:
         args = parser.parse_args()
@@ -34,11 +35,17 @@ if __name__ == "__main__":
 
     result = xss_payloads
 
+    def pipe(payload):
+        if args.lower:
+            payload = payload.lower()
+        return payload
+        
+
     if len(args.filter_regex) > 0:
-        [result.remove(xss) for xss in result.copy() for filter in args.filter_regex if bool(re.search(filter, xss)) and xss in result]
+        [result.remove(xss) for xss in result.copy() for filter in args.filter_regex if bool(re.search(filter, pipe(xss))) and xss in result]
 
     if len(args.filter) > 0:
-        [result.remove(xss) for xss in result.copy() for filter in args.filter if filter in xss and xss in result]
+        [result.remove(xss) for xss in result.copy() for filter in args.filter if filter in pipe(xss) and xss in result]
 
     if args.show_payloads:
         [print(xss) for xss in result]
