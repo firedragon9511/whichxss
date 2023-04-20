@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys, argparse, re
+import sys, argparse, re, requests
 from argparse import RawTextHelpFormatter
 
 xss_payloads = None
@@ -17,13 +17,26 @@ banner = '''
    \_/\_/ |_| |_|_|\___|_| |_/_/\_\___/___/                                                                               
 '''
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=banner, formatter_class=RawTextHelpFormatter, usage="python whichxss.py [option]")
 
-    parser.add_argument('-f',     metavar="WAF_FILTER",   dest="filter",          action='append', default=[], help="A text filtered by WAF")
-    parser.add_argument('-fR',    metavar="WAF_REGEX",    dest="filter_regex",    action='append', default=[], help="A text filtered by WAF using Regex")
-    parser.add_argument('-l',     default=False,          action="store_true",    dest="lower", help="Treat all payloads as lowercase in search")
-    parser.add_argument('--show', default=False,          action="store_true",    dest="show_payloads", help="Show results")
+    parser.add_argument('-f',     metavar="WAF_FILTER",   dest="filter",          action='append', default=[],   help="A text filtered by WAF")
+    parser.add_argument('-fR',    metavar="WAF_REGEX",    dest="filter_regex",    action='append', default=[],   help="A text filtered by WAF using Regex")
+    parser.add_argument('-u',     metavar="URL",          dest="url_scan",        action='store',  default=None, help="Heuristic WAF block scan (beta). E.g. -u \"http://siteabc.com/?search=FUZZ\"")
+    parser.add_argument('-l',     default=False,          action="store_true",    dest="lower",                  help="Treat all payloads as lowercase in search")
+    parser.add_argument('--show', default=False,          action="store_true",    dest="show_payloads",          help="Show results")
 
     try:
         args = parser.parse_args()
@@ -35,11 +48,28 @@ if __name__ == "__main__":
 
     result = xss_payloads
 
+    def heuristic_test(url):
+        print()
+        with open("heuristic.txt", "r", encoding="UTF-8") as file:
+            data = file.read().split("\n")
+            for term in data:
+                u = url.replace("FUZZ", term)
+                response = requests.get(u)
+                code = response.status_code
+                if code == 403:
+                    print(bcolors.FAIL + "[HEURISTIC] Blocked by WAF: " + term + bcolors.ENDC)
+                else:
+                    print(bcolors.OKGREEN + "[HEURISTIC] Passed in WAF: " + term + bcolors.ENDC)
+
+
+
     def pipe(payload):
         if args.lower:
             payload = payload.lower()
         return payload
         
+    if args.url_scan is not None:
+        heuristic_test(args.url_scan)
 
     if len(args.filter_regex) > 0:
         [result.remove(xss) for xss in result.copy() for filter in args.filter_regex if bool(re.search(filter, pipe(xss))) and xss in result]
