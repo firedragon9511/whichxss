@@ -68,8 +68,8 @@ if __name__ == "__main__":
                 values.append(re.search(match_value, term).group(1))
 
         if combine:
-            elements = ["%s %s=@VALUE@>" % (t, e) for t in tags for e in events]
-            [print(e.replace("@VALUE@", v)) for e in elements for v in values]
+            elements = ["%s %s=-VALUE->" % (t, e) for t in tags for e in events]
+            [print(e.replace("-VALUE-", v)) for e in elements for v in values]
         else:
             param = "-f \"%s\""
             result = []
