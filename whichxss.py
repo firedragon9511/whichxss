@@ -93,19 +93,21 @@ if __name__ == "__main__":
             data = file.read().split("\n")
             data = list(dict.fromkeys(data))
             result = []
+            blocked = []
             for term in data:
                 u = url.replace("FUZZ", term)
                 response = requests.get(u)
                 code = response.status_code
                 if code == 403:
                     print(bcolors.FAIL + "[HEURISTIC] Blocked by WAF: " + term + bcolors.ENDC)
+                    blocked.append(term)
                 else:
                     print(bcolors.OKGREEN + "[HEURISTIC] Passed in WAF: " + term + bcolors.ENDC)
                     result.append(term)
 
             ask1 = input("[ASK] Show filter command results? [Y/n]").lower().strip()
             if ask1 == "y" or ask1 == "":
-                cmd = process_pseudopayloads(result, False)
+                cmd = process_pseudopayloads(blocked, False)
                 ask3 = input("[ASK] Execute? [Y/n]").lower().strip()
                 if ask3 == "y" or ask3 == "":
                     #print(cmd.replace("'", "\\'"))
