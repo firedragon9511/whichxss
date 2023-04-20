@@ -48,11 +48,35 @@ if __name__ == "__main__":
 
     result = xss_payloads
 
+    def process_pseudopayloads(result):
+        match_tag   = r"<[a-zA-Z]+>"
+        match_event = r"<aaaaaa (on[a-zA-Z]+)=bbbbbb>"
+        match_value = r"cccccc=(\".*\")"
+
+        tags   = []
+        events = []
+        values = []
+
+        for term in result:
+            if re.search(match_tag, term):
+                tags.append(re.search(match_tag, term).group(0).replace(">", ""))
+
+            if re.search(match_event, term):
+                events.append(re.search(match_event, term).group(1))
+
+            if re.search(match_value, term):
+                values.append(re.search(match_value, term).group(1))
+
+        elements = ["%s %s=@VALUE@>" % (t, e) for t in tags for e in events]
+        [print(e.replace("@VALUE@", v)) for e in elements for v in values]
+
+
     def heuristic_test(url):
         print()
         with open("heuristic.txt", "r", encoding="UTF-8") as file:
             data = file.read().split("\n")
             data = list(dict.fromkeys(data))
+            result = []
             for term in data:
                 u = url.replace("FUZZ", term)
                 response = requests.get(u)
@@ -61,16 +85,20 @@ if __name__ == "__main__":
                     print(bcolors.FAIL + "[HEURISTIC] Blocked by WAF: " + term + bcolors.ENDC)
                 else:
                     print(bcolors.OKGREEN + "[HEURISTIC] Passed in WAF: " + term + bcolors.ENDC)
+                    result.append(term)
 
+            process_pseudopayloads(result)
 
 
     def pipe(payload):
         if args.lower:
             payload = payload.lower()
         return payload
+    
         
     if args.url_scan is not None:
         heuristic_test(args.url_scan)
+        sys.exit()
 
     if len(args.filter_regex) > 0:
         [result.remove(xss) for xss in result.copy() for filter in args.filter_regex if bool(re.search(filter, pipe(xss))) and xss in result]
