@@ -74,7 +74,7 @@ if __name__ == "__main__":
             param = "-f \"%s\""
             result = []
             for t in tags:
-                result.append(param % (t + ">") )
+                result.append(param % (t + "") )
             
             for e in events:
                 result.append(param % e)
@@ -82,7 +82,7 @@ if __name__ == "__main__":
             for v in values:
                 result.append(param % v.replace("\"", "\\\""))
 
-            cmd = (os.path.basename(sys.executable) + " " + sys.argv[0] + " " + " ".join(result) + " --show")
+            cmd = (os.path.basename(sys.executable) + " " + sys.argv[0] + " " + " ".join(result) + " -l --show")
             print(cmd)
             return cmd
             pass
