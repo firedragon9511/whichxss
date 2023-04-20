@@ -137,7 +137,9 @@ if __name__ == "__main__":
         [result.remove(xss) for xss in result.copy() for filter in args.filter if filter in pipe(xss) and xss in result]
 
     if args.show_payloads:
-        [print(xss) for xss in result]
+        for xss in result:
+            print(xss)
+        #[print(xss) for xss in result]
     
     if not args.show_payloads:
         print("\n", "[INFO] Results: %s, use --show for get results" % str(len(result)))
