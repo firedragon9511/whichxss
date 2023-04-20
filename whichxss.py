@@ -52,6 +52,7 @@ if __name__ == "__main__":
         print()
         with open("heuristic.txt", "r", encoding="UTF-8") as file:
             data = file.read().split("\n")
+            data = list(dict.fromkeys(data))
             for term in data:
                 u = url.replace("FUZZ", term)
                 response = requests.get(u)
