@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     result = xss_payloads
 
-    def process_pseudopayloads(result):
+    def combine_pseudopayloads(result):
         match_tag   = r"<[a-zA-Z]+>"
         match_event = r"<aaaaaa (on[a-zA-Z]+)=bbbbbb>"
         match_value = r"cccccc=(\".*\")"
@@ -87,7 +87,8 @@ if __name__ == "__main__":
                     print(bcolors.OKGREEN + "[HEURISTIC] Passed in WAF: " + term + bcolors.ENDC)
                     result.append(term)
 
-            process_pseudopayloads(result)
+            if input("[ASK] Show some combinations? [y/N]").lower() == "y":
+                combine_pseudopayloads(result)
 
 
     def pipe(payload):
