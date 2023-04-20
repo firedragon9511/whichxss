@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys, argparse, re, requests
+import sys, argparse, re, requests, os
 from argparse import RawTextHelpFormatter
 
 xss_payloads = None
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     result = xss_payloads
 
-    def combine_pseudopayloads(result):
+    def process_pseudopayloads(result, combine):
         match_tag   = r"<[a-zA-Z]+>"
         match_event = r"<aaaaaa (on[a-zA-Z]+)=bbbbbb>"
         match_value = r"cccccc=(\".*\")"
@@ -67,9 +67,25 @@ if __name__ == "__main__":
             if re.search(match_value, term):
                 values.append(re.search(match_value, term).group(1))
 
-        elements = ["%s %s=@VALUE@>" % (t, e) for t in tags for e in events]
-        [print(e.replace("@VALUE@", v)) for e in elements for v in values]
+        if combine:
+            elements = ["%s %s=@VALUE@>" % (t, e) for t in tags for e in events]
+            [print(e.replace("@VALUE@", v)) for e in elements for v in values]
+        else:
+            param = "-f \"%s\""
+            result = []
+            for t in tags:
+                result.append(param % (t + ">") )
+            
+            for e in events:
+                result.append(param % e)
 
+            for v in values:
+                result.append(param % v.replace("\"", "\\\""))
+
+            cmd = ("python " + sys.argv[0] + " " + " ".join(result) + " --show")
+            print(cmd)
+            return cmd
+            pass
 
     def heuristic_test(url):
         print()
@@ -87,8 +103,17 @@ if __name__ == "__main__":
                     print(bcolors.OKGREEN + "[HEURISTIC] Passed in WAF: " + term + bcolors.ENDC)
                     result.append(term)
 
-            if input("[ASK] Show some combinations? [y/N]").lower() == "y":
-                combine_pseudopayloads(result)
+            ask1 = input("[ASK] Show filter command results? [Y/n]").lower().strip()
+            if ask1 == "y" or ask1 == "":
+                cmd = process_pseudopayloads(result, False)
+                ask3 = input("[ASK] Execute? [Y/n]").lower().strip()
+                if ask3 == "y" or ask3 == "":
+                    #print(cmd.replace("'", "\\'"))
+                    os.system(cmd)
+
+            ask2 = input("[ASK] Show some combinations? [y/N]").lower()
+            if ask2 == "y":
+                process_pseudopayloads(result, True)
 
 
     def pipe(payload):
