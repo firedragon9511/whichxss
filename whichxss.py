@@ -80,7 +80,7 @@ if __name__ == "__main__":
                 result.append(param % e)
 
             for v in values:
-                result.append(param % v.replace("\"", "\\\""))
+                result.append(param % v.replace("\"", "\\\"").replace("bbbbbb", ""))
 
             cmd = (os.path.basename(sys.executable) + " " + sys.argv[0] + " " + " ".join(result) + " -l --show")
             print(cmd)
