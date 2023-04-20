@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import sys, argparse, re, requests, os
 from argparse import RawTextHelpFormatter
@@ -82,7 +82,7 @@ if __name__ == "__main__":
             for v in values:
                 result.append(param % v.replace("\"", "\\\""))
 
-            cmd = ("python3 " + sys.argv[0] + " " + " ".join(result) + " --show")
+            cmd = (os.path.basename(sys.executable) + " " + sys.argv[0] + " " + " ".join(result) + " --show")
             print(cmd)
             return cmd
             pass
