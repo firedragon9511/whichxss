@@ -32,11 +32,12 @@ class bcolors:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=banner, formatter_class=RawTextHelpFormatter, usage="python3 whichxss.py [option]")
 
-    parser.add_argument('-f',     metavar="WAF_FILTER",   dest="filter",          action='append', default=[],   help="A text filtered by WAF")
-    parser.add_argument('-fR',    metavar="WAF_REGEX",    dest="filter_regex",    action='append', default=[],   help="A text filtered by WAF using Regex")
-    parser.add_argument('-u',     metavar="URL",          dest="url_scan",        action='store',  default=None, help="Heuristic WAF block scan (beta). E.g. -u \"http://siteabc.com/?search=FUZZ\"")
-    parser.add_argument('-l',     default=False,          action="store_true",    dest="lower",                  help="Treat all payloads as lowercase in search")
-    parser.add_argument('--show', default=False,          action="store_true",    dest="show_payloads",          help="Show results")
+    parser.add_argument('-f',     metavar="WAF_FILTER",   dest="filter",          action='append', default=[],    help="A text filtered by WAF")
+    parser.add_argument('-fR',    metavar="WAF_REGEX",    dest="filter_regex",    action='append', default=[],    help="A text filtered by WAF using Regex")
+    parser.add_argument('-u',     metavar="URL",          dest="url_scan",        action='store',  default=None,  help="Heuristic WAF block scan (beta). E.g. -u \"http://siteabc.com/?search=FUZZ\"")
+    parser.add_argument('-b',     metavar="CODE",         dest="bad_code",        action='store',  default="403", help="Bad WAF code. Default: 403.")
+    parser.add_argument('-l',     default=False,          action="store_true",    dest="lower",                   help="Treat all payloads as lowercase in search")
+    parser.add_argument('--show', default=False,          action="store_true",    dest="show_payloads",           help="Show results")
 
     try:
         args = parser.parse_args()
@@ -80,7 +81,7 @@ if __name__ == "__main__":
                 result.append(param % e)
 
             for v in values:
-                result.append(param % v.replace("\"", "\\\"").replace("bbbbbb", ""))
+                result.append(param % v.replace("\"", "").replace("\"", "\\\"").replace("bbbbbb)", "").replace("bbbbbb", ""))
 
             cmd = (os.path.basename(sys.executable) + " " + sys.argv[0] + " " + " ".join(result) + " -l --show")
             print(cmd)
@@ -98,7 +99,7 @@ if __name__ == "__main__":
                 u = url.replace("FUZZ", term)
                 response = requests.get(u)
                 code = response.status_code
-                if code == 403:
+                if str(code) == args.bad_code:
                     print(bcolors.FAIL + "[HEURISTIC] Blocked by WAF: " + term + bcolors.ENDC)
                     blocked.append(term)
                 else:
@@ -113,7 +114,7 @@ if __name__ == "__main__":
                     #print(cmd.replace("'", "\\'"))
                     os.system(cmd)
 
-            ask2 = input("[ASK] Show some combinations? [y/N]").lower()
+            ask2 = input("[ASK] Show some possible combinations based on allowed words? [y/N]").lower()
             if ask2 == "y":
                 process_pseudopayloads(result, True)
 

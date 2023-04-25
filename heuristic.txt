@@ -69,11 +69,11 @@
 <aaaaaa rel=bbbbbb>
 <aaaaaa value=bbbbbb>
 <aaaaaa data=bbbbbb>
-<aaaaaa cccccc="eval(1)">
+<aaaaaa cccccc="eval(bbbbbb)">
 <aaaaaa cccccc="javascript:bbbbbb">
-<aaaaaa cccccc="alert(1)">
-<aaaaaa cccccc="prompt(1)">
-<aaaaaa cccccc="confirm(1)">
+<aaaaaa cccccc="alert(bbbbbb)">
+<aaaaaa cccccc="prompt(bbbbbb)">
+<aaaaaa cccccc="confirm(bbbbbb)">
 <aaaaaa cccccc="document.cookie">
 <aaaaaa cccccc="document">
 <aaaaaa cccccc=&{xxxxxx}>
